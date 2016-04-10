@@ -13,9 +13,11 @@ public class RunServer {
         ServerFileManager fileManager = new ServerFileManager();
         try {
             Server server = fileManager.parseInput();
-            System.out.println(server.depositList);
+            //System.out.println(server.depositList);
+            server.ready();
         } catch (IOException e) {
-            System.out.println("Input File Not Found!");
+            System.out.println("Input File Not Found!\n Or  server port problem");
+            e.printStackTrace();
         } catch (ParseException e) {
             System.out.println("Cannot Read Input JSON File!");
         }

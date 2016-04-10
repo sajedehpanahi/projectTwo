@@ -75,8 +75,8 @@ public class TerminalFileManager {
                         terminalType = attributes.next().getValue();
                     } else if ("server".equalsIgnoreCase(qName)) {
                         attributes = startElement.getAttributes();
+                        serverInfo.setPort(Integer.parseInt(attributes.next().getValue().trim()));
                         serverInfo.setIp(attributes.next().getValue());
-                        serverInfo.setPort(attributes.next().getValue());
                     } else if ("outlog".equalsIgnoreCase(qName)) {
                         attributes = startElement.getAttributes();
                         logFilePath = attributes.next().getValue();

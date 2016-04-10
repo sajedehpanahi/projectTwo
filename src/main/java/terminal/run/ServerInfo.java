@@ -6,7 +6,7 @@ package terminal.run;
 public class ServerInfo {
 
     String ip;
-    String port;
+    int port;
 
     public String getIp() {
         return ip;
@@ -16,11 +16,11 @@ public class ServerInfo {
         this.ip = ip;
     }
 
-    public String getPort() {
+    public int getPort() {
         return port;
     }
 
-    public void setPort(String port) {
+    public void setPort(int port) {
         this.port = port;
     }
 

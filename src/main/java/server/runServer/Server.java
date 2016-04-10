@@ -1,11 +1,17 @@
 package server.runServer;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.List;
 
 /**
  * Created by DotinSchool2 on 4/9/2016.
  */
-public class Server {
+public class Server extends Thread {
 
     int port;
 //    String outLog;
@@ -24,8 +30,33 @@ public class Server {
         this.depositList = depositList;
     }
 
-    public void ready(){
-        //wait for terminals request
+    public void ready() throws IOException {
+
+        ServerSocket serverSocket;
+        serverSocket = new ServerSocket(7070);
+        serverSocket.setSoTimeout(10000);
+        while(true)
+        {
+            try
+            {
+                System.out.println("Waiting for client on port " +serverSocket.getLocalPort() + "...");
+                Socket server = serverSocket.accept();
+                System.out.println("Just connected to "+ server.getRemoteSocketAddress());
+                DataInputStream serverDataInputStream = new DataInputStream(server.getInputStream());
+                System.out.println(serverDataInputStream.readUTF());
+                DataOutputStream serverDataOutputStream =new DataOutputStream(server.getOutputStream());
+                serverDataOutputStream.writeUTF("Thank you for connecting to "+ server.getLocalSocketAddress() + "\nGoodbye!");
+                server.close();
+            }catch(SocketTimeoutException e)
+            {
+                System.out.println("Socket timed out!");
+                break;
+            }catch(IOException e)
+            {
+                e.printStackTrace();
+                break;
+            }
+        }
     }
 
     public void validation(){
