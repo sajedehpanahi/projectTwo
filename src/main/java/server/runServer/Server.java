@@ -7,12 +7,21 @@ import java.util.List;
  */
 public class Server {
 
-    String port;
-    String outLog;
+    int port;
+//    String outLog;
     List<Deposit> depositList;
 
-    public void setPort(String port) {
+    public void setPort(int port) {
         this.port = port;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public Server(int port, List<Deposit> depositList) {
+        this.port = port;
+        this.depositList = depositList;
     }
 
     public void ready(){

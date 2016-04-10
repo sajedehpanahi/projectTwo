@@ -1,6 +1,6 @@
 {
     "port":8080,
-    "deposit":[
+    "deposits":[
         {
             "customer":"Ali Alavi",
             "id":"33227781",

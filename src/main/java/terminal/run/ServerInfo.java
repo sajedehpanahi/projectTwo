@@ -3,15 +3,10 @@ package terminal.run;
 /**
  * Created by DotinSchool2 on 4/9/2016.
  */
-public class Server {
+public class ServerInfo {
 
     String ip;
     String port;
-
-    public Server(String ip, String port) {
-        this.ip = ip;
-        this.port = port;
-    }
 
     public String getIp() {
         return ip;

@@ -45,4 +45,14 @@ public class Transaction {
     public void setDeposit(String deposit) {
         this.deposit = deposit;
     }
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "id='" + id + '\'' +
+                ", type='" + type + '\'' +
+                ", amount=" + amount +
+                ", deposit='" + deposit + '\'' +
+                '}';
+    }
 }

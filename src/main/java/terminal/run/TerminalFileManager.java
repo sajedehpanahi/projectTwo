@@ -14,34 +14,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * Created by DotinSchool2 on 4/9/2016.
- */
+
 public class TerminalFileManager {
 
     private String inputFilePath = "src\\\\main\\\\resources\\\\terminal.xml";
     private String logFilePath;
     private String responseFilePath = "src\\\\main\\\\resources\\\\response.xml";
-    private String terminalId;
-    private String terminalType;
-    private Server serverSettings;
-    private List<Transaction> transactionList = new ArrayList<Transaction>();
-
-    public List<Transaction> getTransactionList() {
-        return transactionList;
-    }
-
-    public Server getServerSettings() {
-        return serverSettings;
-    }
-
-    public String getTerminalType() {
-        return terminalType;
-    }
-
-    public String getTerminalId() {
-        return terminalId;
-    }
 
     public String getInputFilePath() {
         return inputFilePath;
@@ -68,16 +46,21 @@ public class TerminalFileManager {
     }
 
 
-    public void ParseInput() throws FileNotFoundException, XMLStreamException {
+    public Terminal parseInput() throws FileNotFoundException, XMLStreamException {
+
+        String terminalId ="";
+        String terminalType ="";
+        ServerInfo serverInfo = new ServerInfo();
+        List<Transaction> transactionList = new ArrayList<Transaction>();
+
+        String transactionId = "";
+        String transactionType = "";
+        int transactionAmount = 0;
+        String transactionDeposit = "";
+        boolean hasTransaction = false;
 
         XMLInputFactory factory = XMLInputFactory.newInstance();
         XMLEventReader eventReader = factory.createXMLEventReader(new FileReader(inputFilePath));
-
-        String transactionId="";
-        String transactionType="";
-        int transactionAmount=0;
-        String transactionDeposit="";
-        boolean hasTransaction=false;
 
         while (eventReader.hasNext()) {
             XMLEvent event = eventReader.nextEvent();
@@ -90,49 +73,41 @@ public class TerminalFileManager {
                         attributes = startElement.getAttributes();
                         terminalId = attributes.next().getValue();
                         terminalType = attributes.next().getValue();
-                        System.out.println("start terminal");
                     } else if ("server".equalsIgnoreCase(qName)) {
                         attributes = startElement.getAttributes();
-                        String port = attributes.next().getValue();
-                        String ip = attributes.next().getValue();
-                        serverSettings = new Server(ip, port);
-                        System.out.println("start server");
+                        serverInfo.setIp(attributes.next().getValue());
+                        serverInfo.setPort(attributes.next().getValue());
                     } else if ("outlog".equalsIgnoreCase(qName)) {
                         attributes = startElement.getAttributes();
                         logFilePath = attributes.next().getValue();
-                        System.out.println("start out log");
-                    }else if ("transaction".equalsIgnoreCase(qName)) {
+                    } else if ("transaction".equalsIgnoreCase(qName)) {
                         attributes = startElement.getAttributes();
-                        transactionAmount = Integer.parseInt(attributes.next().getValue().trim());
-                        System.out.println(transactionAmount);
+                        transactionAmount = Integer.parseInt(attributes.next().getValue().trim().replace(",", ""));
                         transactionDeposit = attributes.next().getValue();
-                        System.out.println(transactionDeposit);
                         transactionId = attributes.next().getValue();
-                        System.out.println(transactionId);
                         transactionType = attributes.next().getValue();
-                        System.out.println(transactionType);
                         hasTransaction = true;
                     }
                     break;
                 case XMLStreamConstants.END_ELEMENT:
                     EndElement endElement = event.asEndElement();
-                    if (endElement.getName().getLocalPart().equalsIgnoreCase("transaction") && hasTransaction){
+                    if (endElement.getName().getLocalPart().equalsIgnoreCase("transaction") && hasTransaction) {
+                        //terminal.addTransaction(transactionId, transactionType, transactionAmount, transactionDeposit);
                         transactionList.add(new Transaction(transactionId,transactionType,transactionAmount,transactionDeposit));
-                        System.out.println("transaction added");
                     }
                     break;
             }
         }
-    }
+        return  new Terminal(terminalId,terminalType,serverInfo,transactionList);
+   }
 
-    public void addToLogFile(String logFilePath){
-
-    }
-
-    public void addToResponses(){
+    public void addToLogFile(String logFilePath) {
 
     }
 
+    public void addToResponses() {
+
+    }
 
 
 }

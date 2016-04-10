@@ -49,5 +49,13 @@ public class Deposit {
         this.upperBound = upperBound;
     }
 
-
+    @Override
+    public String toString() {
+        return "Deposit{" +
+                "customer='" + customer + '\'' +
+                ", id='" + id + '\'' +
+                ", initialBalance=" + initialBalance +
+                ", upperBound=" + upperBound +
+                '}';
+    }
 }
