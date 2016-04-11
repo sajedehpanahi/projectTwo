@@ -55,4 +55,9 @@ public class Transaction {
                 ", deposit='" + deposit + '\'' +
                 '}';
     }
+
+    public String toStream(){
+
+        return id + "#" + type + "#" + amount + "#" + deposit;
+    }
 }

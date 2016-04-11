@@ -53,15 +53,20 @@ public class Terminal {
 
     public void connectToServer() throws IOException {
 
-        //System.out.println("Connecting to " + serverInfo.getIp() +" on port " + serverInfo.getPort());
-        Socket terminalSocket = new Socket( serverInfo.getIp() , 7070);
-        //System.out.println("Just connected to " + terminalSocket.getRemoteSocketAddress());
-        OutputStream terminalOutputStream = terminalSocket.getOutputStream();
-        DataOutputStream terminalDataOutputStream = new DataOutputStream(terminalOutputStream);
-        terminalDataOutputStream.writeUTF("Hello from "+ terminalSocket.getLocalSocketAddress());
-        InputStream terminalInputStream = terminalSocket.getInputStream();
-        DataInputStream terminalDataInputStream = new DataInputStream(terminalInputStream);
-        System.out.println("Server says " + terminalDataInputStream.readUTF());
+        System.out.println("Connecting to " + serverInfo.getIp() +" on port " + serverInfo.getPort());
+        Socket terminalSocket = new Socket( serverInfo.getIp() , serverInfo.getPort());
+        System.out.println("Just connected to " + terminalSocket.getRemoteSocketAddress());
+
+        DataOutputStream terminalDataOutputStream = new DataOutputStream(terminalSocket.getOutputStream());
+        DataInputStream terminalDataInputStream = new DataInputStream(terminalSocket.getInputStream());
+
+        for( Transaction transaction : transactionList) {
+            terminalDataOutputStream.writeUTF(transaction.toStream());
+            System.out.println("Server says " + terminalDataInputStream.readUTF());
+            terminalDataOutputStream.flush();
+        }
+
+
         terminalSocket.close();
 
     }

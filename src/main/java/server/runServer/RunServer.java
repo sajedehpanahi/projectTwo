@@ -2,6 +2,7 @@ package server.runServer;
 
 import org.json.simple.parser.ParseException;
 
+import java.io.EOFException;
 import java.io.IOException;
 
 /**
@@ -15,9 +16,11 @@ public class RunServer {
             Server server = fileManager.parseInput();
             //System.out.println(server.depositList);
             server.ready();
+        } catch (EOFException e){
+
         } catch (IOException e) {
             System.out.println("Input File Not Found!\n Or  server port problem");
-            e.printStackTrace();
+            //e.printStackTrace();
         } catch (ParseException e) {
             System.out.println("Cannot Read Input JSON File!");
         }
