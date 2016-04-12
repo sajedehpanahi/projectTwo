@@ -10,6 +10,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * Created by DotinSchool2 on 4/9/2016.
@@ -45,8 +49,17 @@ public class ServerFileManager {
         return new Server(serverPort,depositList);
     }
 
-    public void addToLogFile(String logString)
-    {
+    public void addToLogFile(String info) throws IOException {
+        FileHandler fileHandler;
+        Logger logger;
+        logger = Logger.getLogger("ServerLogFile");
+        fileHandler = new FileHandler("src\\main\\resources\\ServerLogFile.log");
+        logger.addHandler(fileHandler);
+        SimpleFormatter simpleFormatter = new SimpleFormatter();
+        fileHandler.setFormatter(simpleFormatter);
+        logger.info(info);
+        logger.log(Level.OFF,info);
+        fileHandler.close();
 
     }
 }

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<responses>
+    <response amount="10000" deposit="35527439" errorMessage="invalid customer information!" id="2" status="failed" type="withdraw"/>
+    <response amount="20000" deposit="39627439" errorMessage="invalid customer information!" id="3" status="failed" type="withdraw"/>
+    <response amount="8000" deposit="35527029" errorMessage="invalid customer information!" id="4" status="failed" type="deposit"/>
+<response amount="3000" deposit="33227781" errorMessage="no error" id="1" status="Done" type="deposit"/>
+<response amount="10000" deposit="35527439" errorMessage="invalid customer information!" id="2" status="failed" type="withdraw"/>
+<response amount="20000" deposit="39627439" errorMessage="invalid customer information!" id="3" status="failed" type="withdraw"/>
+<response amount="8000" deposit="35527029" errorMessage="invalid customer information!" id="4" status="failed" type="deposit"/>
+</responses>

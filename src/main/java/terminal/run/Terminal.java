@@ -1,5 +1,6 @@
 package terminal.run;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 import java.net.Socket;
 import java.util.List;
@@ -50,47 +51,29 @@ public class Terminal {
         this.transactionList = transactionList;
     }
 
-    public void addTransaction(String id,String type,int amount,String deposit){
-        transactionList.add(new Transaction(id,type,amount,deposit));
-    }
+    public void Run() throws IOException {
 
-    public void connectToServer() throws IOException {
-
-       // System.out.println("Connecting to " + serverInfo.getIp() +" on port " + serverInfo.getPort());
         Socket terminalSocket = new Socket( serverInfo.getIp() , serverInfo.getPort());
-        //System.out.println("Just connected to " + terminalSocket.getRemoteSocketAddress());
 
         DataOutputStream terminalDataOutputStream = new DataOutputStream(terminalSocket.getOutputStream());
         DataInputStream terminalDataInputStream = new DataInputStream(terminalSocket.getInputStream());
 
+        TerminalFileManager fileManager = new TerminalFileManager();
+
         for( Transaction transaction : transactionList) {
             terminalDataOutputStream.writeUTF(transaction.toStream());
-            System.out.println("Server says " + terminalDataInputStream.readUTF());
-            terminalDataOutputStream.flush();
+            //System.out.println("Server says " + terminalDataInputStream.readUTF());
+            fileManager.saveResponse(terminalDataInputStream.readUTF());
+           // terminalDataOutputStream.flush();
+            fileManager.getLog("Response Received");
+            fileManager.close();
         }
-
-
         terminalSocket.close();
-
     }
 
-    public void getLog(String info) {
-
-        Logger logger = Logger.getLogger("TerminalLogFile");
-        FileHandler fileHandler;
-        try {
-
-            fileHandler = new FileHandler("src\\main\\resources\\TerminalLogFile.log");
-            logger.addHandler(fileHandler);
-            SimpleFormatter simpleFormatter = new SimpleFormatter();
-            fileHandler.setFormatter(simpleFormatter);
-            logger.info(info);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
 
 
 }
+
+

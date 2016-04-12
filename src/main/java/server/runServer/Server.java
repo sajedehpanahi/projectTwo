@@ -19,7 +19,6 @@ import java.util.logging.SimpleFormatter;
 public class Server extends Thread {
 
     int port;
-    //    String outLog;
     List<Deposit> depositList;
 
     public void setPort(int port) {
@@ -49,12 +48,14 @@ public class Server extends Thread {
             DataInputStream serverDataInputStream = new DataInputStream(socket.getInputStream());
             DataOutputStream serverDataOutputStream = new DataOutputStream(socket.getOutputStream());
 
-            while (serverDataInputStream.available() > 0) {
+            ServerFileManager fileManager = new ServerFileManager();
+            while (serverDataInputStream.available() >= 0) {
 
                 String inputStream = serverDataInputStream.readUTF();
-                System.out.println(inputStream);
+                //System.out.println(inputStream);
                 String response = validation(inputStream);
                 serverDataOutputStream.writeUTF(response);
+                fileManager.addToLogFile("response sent");
             }
             socket.close();
 
@@ -66,33 +67,39 @@ public class Server extends Thread {
 
     public String validation(String inputStream) {
         String[] inputElements = inputStream.split("#");
-        String response = inputElements[0] + "#" + inputElements[1] + "#" + inputElements[3] + "#";
+        String response = inputElements[0] + "#" + inputElements[1] + "#" + inputElements[2] + "#"+ inputElements[3] + "#";
         for (Deposit deposit : depositList) {
             if (deposit.getId().equalsIgnoreCase(inputElements[3])) {
                 if ("deposit".equalsIgnoreCase(inputElements[1])) {
                     if (deposit.getInitialBalance() + Integer.parseInt(inputElements[2].trim()) < deposit.getUpperBound()) {
                         deposit.setInitialBalance(deposit.getInitialBalance() + Integer.parseInt(inputElements[2].trim()));
                         response += "Done#no error";
+                        break;
 
                     } else {
                         System.out.println("error in transaction " + inputElements[0] + ": upper bound limit!");
                         response += "failed#upper bound limit!";
+                        break;
                     }
                 } else if ("withdraw".equalsIgnoreCase(inputElements[1])) {
                     if (deposit.getInitialBalance() > Integer.parseInt(inputElements[2].trim())) {
                         deposit.setInitialBalance(deposit.getInitialBalance() - Integer.parseInt(inputElements[2].trim()));
                         response += "Done#no error";
+                        break;
                     } else {
                         System.out.println("error in transaction " + inputElements[0] + ": not enough initial balance!");
                         response += "failed#not enough initial balance!";
+                        break;
                     }
                 } else {
                     System.out.println("error in transaction " + inputElements[0] + ": invalid transaction type!");
                     response += "failed#invalid transaction type!";
+                    break;
                 }
             } else {
                 System.out.println("error in transaction " + inputElements[0] + ": invalid customer information!");
                 response += "failed#invalid customer information!";
+                break;
             }
         }
         return response;
