@@ -3,6 +3,9 @@ package terminal.run;
 import java.io.*;
 import java.net.Socket;
 import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 
 public class Terminal {
@@ -53,9 +56,9 @@ public class Terminal {
 
     public void connectToServer() throws IOException {
 
-        System.out.println("Connecting to " + serverInfo.getIp() +" on port " + serverInfo.getPort());
+       // System.out.println("Connecting to " + serverInfo.getIp() +" on port " + serverInfo.getPort());
         Socket terminalSocket = new Socket( serverInfo.getIp() , serverInfo.getPort());
-        System.out.println("Just connected to " + terminalSocket.getRemoteSocketAddress());
+        //System.out.println("Just connected to " + terminalSocket.getRemoteSocketAddress());
 
         DataOutputStream terminalDataOutputStream = new DataOutputStream(terminalSocket.getOutputStream());
         DataInputStream terminalDataInputStream = new DataInputStream(terminalSocket.getInputStream());
@@ -71,8 +74,21 @@ public class Terminal {
 
     }
 
-    public void sendRequests(){
+    public void getLog(String info) {
 
+        Logger logger = Logger.getLogger("TerminalLogFile");
+        FileHandler fileHandler;
+        try {
+
+            fileHandler = new FileHandler("src\\main\\resources\\TerminalLogFile.log");
+            logger.addHandler(fileHandler);
+            SimpleFormatter simpleFormatter = new SimpleFormatter();
+            fileHandler.setFormatter(simpleFormatter);
+            logger.info(info);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

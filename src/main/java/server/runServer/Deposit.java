@@ -1,9 +1,11 @@
 package server.runServer;
 
+import java.util.List;
+
 /**
  * Created by DotinSchool2 on 4/9/2016.
  */
-public class Deposit {
+public class Deposit implements Comparable<Deposit> {
 
     String customer;
     String id;
@@ -58,4 +60,17 @@ public class Deposit {
                 ", upperBound=" + upperBound +
                 '}';
     }
+
+    @Override
+    public int compareTo(Deposit deposit){
+        int result = id.compareTo(deposit.getId());
+        if (result == 10){
+            return 1;
+        }
+        if(result==-10){
+            return -1;
+        }
+        return 0;
+    }
+
 }

@@ -7,7 +7,11 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.Collections;
 import java.util.List;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * Created by DotinSchool2 on 4/9/2016.
@@ -15,7 +19,7 @@ import java.util.List;
 public class Server extends Thread {
 
     int port;
-//    String outLog;
+    //    String outLog;
     List<Deposit> depositList;
 
     public void setPort(int port) {
@@ -37,8 +41,6 @@ public class Server extends Thread {
         serverSocket = new ServerSocket(port);
         serverSocket.setSoTimeout(10000);
 
-        //while(true)
-        //{
         System.out.println("Waiting for client on port " + serverSocket.getLocalPort() + "...");
         Socket socket = serverSocket.accept();
         System.out.println("Just connected to " + socket.getRemoteSocketAddress());
@@ -47,16 +49,14 @@ public class Server extends Thread {
             DataInputStream serverDataInputStream = new DataInputStream(socket.getInputStream());
             DataOutputStream serverDataOutputStream = new DataOutputStream(socket.getOutputStream());
 
-            while (true) {
+            while (serverDataInputStream.available() > 0) {
 
                 String inputStream = serverDataInputStream.readUTF();
                 System.out.println(inputStream);
-                if (inputStream == "end") {
-                    break;
-                }
-                serverDataOutputStream.writeUTF("Response to terminal");
+                String response = validation(inputStream);
+                serverDataOutputStream.writeUTF(response);
             }
-                socket.close();
+            socket.close();
 
         } catch (SocketTimeoutException e) {
             System.out.println("Socket timed out!");
@@ -64,13 +64,54 @@ public class Server extends Thread {
         }
     }
 
-    public void validation(){
+    public String validation(String inputStream) {
+        String[] inputElements = inputStream.split("#");
+        String response = inputElements[0] + "#" + inputElements[1] + "#" + inputElements[3] + "#";
+        for (Deposit deposit : depositList) {
+            if (deposit.getId().equalsIgnoreCase(inputElements[3])) {
+                if ("deposit".equalsIgnoreCase(inputElements[1])) {
+                    if (deposit.getInitialBalance() + Integer.parseInt(inputElements[2].trim()) < deposit.getUpperBound()) {
+                        deposit.setInitialBalance(deposit.getInitialBalance() + Integer.parseInt(inputElements[2].trim()));
+                        response += "Done#no error";
 
+                    } else {
+                        System.out.println("error in transaction " + inputElements[0] + ": upper bound limit!");
+                        response += "failed#upper bound limit!";
+                    }
+                } else if ("withdraw".equalsIgnoreCase(inputElements[1])) {
+                    if (deposit.getInitialBalance() > Integer.parseInt(inputElements[2].trim())) {
+                        deposit.setInitialBalance(deposit.getInitialBalance() - Integer.parseInt(inputElements[2].trim()));
+                        response += "Done#no error";
+                    } else {
+                        System.out.println("error in transaction " + inputElements[0] + ": not enough initial balance!");
+                        response += "failed#not enough initial balance!";
+                    }
+                } else {
+                    System.out.println("error in transaction " + inputElements[0] + ": invalid transaction type!");
+                    response += "failed#invalid transaction type!";
+                }
+            } else {
+                System.out.println("error in transaction " + inputElements[0] + ": invalid customer information!");
+                response += "failed#invalid customer information!";
+            }
+        }
+        return response;
     }
 
-    public void sendResponseToTerminal(String terminalId){
+    public void getLog(String info) {
 
+        Logger logger = Logger.getLogger("ServerLogFile");
+        FileHandler fileHandler;
+        try {
+
+            fileHandler = new FileHandler("src\\main\\resources\\ServerLogFile.log");
+            logger.addHandler(fileHandler);
+            SimpleFormatter simpleFormatter = new SimpleFormatter();
+            fileHandler.setFormatter(simpleFormatter);
+            logger.info(info);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-
-
 }
