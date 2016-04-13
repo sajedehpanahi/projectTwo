@@ -1,29 +1,41 @@
 package server.runServer;
 
-import org.json.simple.parser.ParseException;
-
-import java.io.EOFException;
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.List;
 
-/**
- * Created by DotinSchool2 on 4/9/2016.
- */
 public class RunServer {
     public static void main(String[] args) {
 
-        ServerFileManager fileManager = new ServerFileManager();
-        try {
-            Server server = fileManager.parseInput();
-            //System.out.println(server.depositList);
-            server.ready();
-        } catch (EOFException e){
+        final ServerFileManager fileManager = new ServerFileManager();
+        fileManager.parseInput();
 
-        } catch (IOException e) {
-            System.out.println("Input File Not Found!\n Or  server port problem");
-            //e.printStackTrace();
-        } catch (ParseException e) {
-            System.out.println("Cannot Read Input JSON File!");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<Deposit> deposits = fileManager.getDepositList();
+                while (true){
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    for (Deposit deposit : deposits){
+                        System.out.println(deposit.getInitialBalance());
+                    }
+                }
+            }
+        }).start();
+
+        try (ServerSocket serverSocket = new ServerSocket(fileManager.getServerPort())) {
+            while (true) {
+                Socket socket = serverSocket.accept();
+                new Thread(new MultiThreadServer(socket , fileManager)).start();
+            }
+        } catch (IOException e){
+            System.out.println("");
+            e.printStackTrace();
         }
-
     }
 }

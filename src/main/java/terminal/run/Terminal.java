@@ -1,12 +1,10 @@
 package terminal.run;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 
 public class Terminal {
@@ -14,7 +12,8 @@ public class Terminal {
     String id;
     String type;
     ServerInfo serverInfo;
-    List<Transaction> transactionList;
+    List<Transaction> transactions;
+    TerminalFileManager fileManager;
 
     public String getId() {
         return id;
@@ -24,56 +23,33 @@ public class Terminal {
         this.id = id;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public ServerInfo getServerInfo() {
-        return serverInfo;
-    }
-
-    public void setServerInfo(ServerInfo serverInfo) {
-        this.serverInfo = this.serverInfo;
-    }
-
-    public List<Transaction> getTransactionList() {
-        return transactionList;
-    }
-
-    public Terminal(String id, String type, ServerInfo serverInfo, List<Transaction> transactionList) {
+    public Terminal(TerminalFileManager terminalFileManager , String id, String type, ServerInfo serverInfo, List<Transaction> transactions) {
         this.id = id;
         this.type = type;
         this.serverInfo = serverInfo;
-        this.transactionList = transactionList;
+        this.transactions = transactions;
+        this.fileManager = terminalFileManager;
     }
 
-    public void Run() throws IOException {
+    public void run() throws IOException {
 
         Socket terminalSocket = new Socket( serverInfo.getIp() , serverInfo.getPort());
 
         DataOutputStream terminalDataOutputStream = new DataOutputStream(terminalSocket.getOutputStream());
         DataInputStream terminalDataInputStream = new DataInputStream(terminalSocket.getInputStream());
 
-        TerminalFileManager fileManager = new TerminalFileManager();
+        terminalDataOutputStream.writeUTF("with id: " + this.id + " and type: "+ this.type + " ");
 
-        for( Transaction transaction : transactionList) {
+        for( Transaction transaction : transactions) {
             terminalDataOutputStream.writeUTF(transaction.toStream());
             //System.out.println("Server says " + terminalDataInputStream.readUTF());
-            fileManager.saveResponse(terminalDataInputStream.readUTF());
-           // terminalDataOutputStream.flush();
-            fileManager.getLog("Response Received");
-            fileManager.close();
+            String responseMessage = terminalDataInputStream.readUTF();
+            System.out.println(responseMessage);
+            fileManager.saveResponse(transaction.getId(), responseMessage);
+            fileManager.getLog("transaction " + transaction.getId() + " in terminal " + this.id + " " + responseMessage);
         }
         terminalSocket.close();
     }
-
-
-
-
 }
 
 

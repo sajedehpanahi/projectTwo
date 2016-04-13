@@ -1,9 +1,9 @@
 package server.runServer;
 
 
-/**
- * Created by DotinSchool2 on 4/9/2016.
- */
+import server.exceptions.NotEnoughInitialBalanceException;
+import server.exceptions.UpperBoundLimitException;
+
 public class Deposit {
 
     String customer;
@@ -18,36 +18,12 @@ public class Deposit {
         this.upperBound = upperBound;
     }
 
-    public String getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(String customer) {
-        this.customer = customer;
-    }
-
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public int getInitialBalance() {
-        return initialBalance;
-    }
-
-    public void setInitialBalance(int initialBalance) {
-        this.initialBalance = initialBalance;
-    }
-
-    public int getUpperBound() {
-        return upperBound;
-    }
-
-    public void setUpperBound(int upperBound) {
-        this.upperBound = upperBound;
     }
 
     @Override
@@ -58,5 +34,23 @@ public class Deposit {
                 ", initialBalance=" + initialBalance +
                 ", upperBound=" + upperBound +
                 '}';
+    }
+
+    public synchronized void deposit(int amount) throws UpperBoundLimitException {
+        if (initialBalance + amount > upperBound) {
+            throw new UpperBoundLimitException(upperBound);
+        }
+        initialBalance=initialBalance + amount;
+    }
+
+    public synchronized void withdraw(int amount) throws NotEnoughInitialBalanceException {
+        if (initialBalance < amount) {
+            throw new NotEnoughInitialBalanceException(initialBalance);
+        }
+        initialBalance=initialBalance - amount;
+    }
+
+    public int getInitialBalance() {
+        return initialBalance;
     }
 }

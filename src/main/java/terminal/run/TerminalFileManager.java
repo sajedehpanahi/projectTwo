@@ -33,43 +33,14 @@ import java.util.logging.SimpleFormatter;
 
 public class TerminalFileManager {
 
-    private String inputFilePath = "src\\\\main\\\\resources\\\\terminal.xml";
+    private String inputFilePath;
     private String logFilePath;
-    private String responseFilePath = "src\\\\main\\\\resources\\\\Response.xml";
-    FileHandler fileHandler;
-    Logger logger;
+    private String responseFilePath;
 
-    public String getInputFilePath() {
-        return inputFilePath;
-    }
-
-    public String getLogFilePath() {
-        return logFilePath;
-    }
-
-    public void setLogFilePath(String logFilePath) {
+    public TerminalFileManager(String inputFilePath, String logFilePath, String responseFilePath) {
+        this.inputFilePath = inputFilePath;
         this.logFilePath = logFilePath;
-    }
-
-    public String getResponseFilePath() {
-        return responseFilePath;
-    }
-
-    public void setResponseFilePath(String responseFilePath) {
         this.responseFilePath = responseFilePath;
-    }
-
-    public void setInputFilePath(String inputFilePath) {
-        this.inputFilePath = "src\\\\main\\\\resources\\\\terminal.xml";
-    }
-
-
-    public TerminalFileManager() throws IOException {
-        logger = Logger.getLogger("TerminalLogFile");
-        fileHandler = new FileHandler("src\\main\\resources\\TerminalLogFile.log");
-        logger.addHandler(fileHandler);
-        SimpleFormatter simpleFormatter = new SimpleFormatter();
-        fileHandler.setFormatter(simpleFormatter);
     }
 
     public Terminal parseInput() throws FileNotFoundException, XMLStreamException {
@@ -105,7 +76,7 @@ public class TerminalFileManager {
                         serverInfo.setIp(attributes.next().getValue());
                     } else if ("outlog".equalsIgnoreCase(qName)) {
                         attributes = startElement.getAttributes();
-                        logFilePath = attributes.next().getValue();
+                        //logFilePath = attributes.next().getValue();
                     } else if ("transaction".equalsIgnoreCase(qName)) {
                         attributes = startElement.getAttributes();
                         transactionAmount = Integer.parseInt(attributes.next().getValue().trim().replace(",", ""));
@@ -124,59 +95,22 @@ public class TerminalFileManager {
                     break;
             }
         }
-        return  new Terminal(terminalId,terminalType,serverInfo,transactionList);
+        return  new Terminal(this , terminalId,terminalType,serverInfo,transactionList);
    }
 
-    public void createResponseFile(String response){
-        try {
-
-            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-
-            Document document = documentBuilder.newDocument();
-            Element rootElement = document.createElement("responses");
-            document.appendChild(rootElement);
-
-            Element responseElement = document.createElement("response");
-            rootElement.appendChild(responseElement);
-
-            responseElement.setAttribute("id", "1");
-
-            // write the content into xml file
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            DOMSource source = new DOMSource(document);
-            StreamResult result = new StreamResult(new File("C:\\file.xml"));
-
-            transformer.transform(source, result);
-
-            System.out.println("File saved!");
-
-        } catch (ParserConfigurationException pce) {
-            pce.printStackTrace();
-        } catch (TransformerException tfe) {
-            tfe.printStackTrace();
-        }
-    }
-
-    public void saveResponse(String responseMessage){
+    public void saveResponse(String transactionId, String responseMessage){
 
         try{
             DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-            Document document = documentBuilder.parse("src\\main\\resources\\Response.xml");
+            Document document = documentBuilder.parse(responseFilePath);
 
             Node root=document.getFirstChild();
 
             Element newElement = document.createElement("response");
-            Response response = new Response().toResponse(responseMessage);
 
-            newElement.setAttribute("id", response.getTransactionId());
-            newElement.setAttribute("type", response.getTransactionType());
-            newElement.setAttribute("amount", response.getTransactionAmount());
-            newElement.setAttribute("deposit", response.getTransactionDeposit());
-            newElement.setAttribute("status", response.getStatus());
-            newElement.setAttribute("errorMessage", response.getErrorMessage());
+            newElement.setAttribute("id", transactionId);
+            newElement.setAttribute("responseMessage", responseMessage);
 
             root.appendChild(newElement);
 
@@ -184,7 +118,7 @@ public class TerminalFileManager {
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(document);
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            StreamResult result = new StreamResult(new File("src\\main\\resources\\Response.xml"));
+            StreamResult result = new StreamResult(new File(responseFilePath));
             transformer.transform(source, result);
 
         } catch (ParserConfigurationException e) {
@@ -198,13 +132,22 @@ public class TerminalFileManager {
         }
     }
 
-    public void close() {
-         fileHandler.close();
-    }
-
     public void getLog(String info) {
-            logger.info(info);
-           logger.log(Level.OFF,info);
-            //logger.config("jmnbvc");
+        try {
+            FileHandler fileHandler;
+            Logger logger;
+            logger = Logger.getLogger("TerminalLogFile");
+//            FileHandler.
+            fileHandler = new FileHandler(logFilePath , true );
+
+            logger.addHandler(fileHandler);
+            SimpleFormatter simpleFormatter = new SimpleFormatter();
+            fileHandler.setFormatter(simpleFormatter);
+  //          logger.info(info);
+//            logger.log(Level.OFF,info);
+            fileHandler.close();
+        }catch (IOException e){
+            System.out.println("Error Reading Terminal Log File!");
+        }
     }
 }
